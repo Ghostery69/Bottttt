@@ -1,369 +1,2414 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SpirtyChat Modern UX 💬</title>
-<style>
-  /* Reset & base */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 0;
-    height: 100vh;
-    background: #121212;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #eee;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Header */
-  header {
-    background: #075E54;
-    padding: 20px;
-    font-size: 1.8rem;
-    font-weight: 700;
-    text-align: center;
-    color: #fff;
-    letter-spacing: 2px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
-    user-select: none;
-  }
-
-  /* Chat container global */
-  #chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #121212;
-  }
-
-  /* Zone des messages */
-  #messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: #25d36633 transparent;
-  }
-  #messages::-webkit-scrollbar {
-    width: 8px;
-  }
-  #messages::-webkit-scrollbar-thumb {
-    background-color: #25d366aa;
-    border-radius: 10px;
-  }
-  #messages::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  /* Bulles messages */
-  .message {
-    max-width: 70%;
-    padding: 14px 20px;
-    border-radius: 30px;
-    font-size: 1rem;
-    line-height: 1.3;
-    word-wrap: break-word;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.3);
-    position: relative;
-    animation: fadeInUp 0.3s ease forwards;
-  }
-
-  /* Animation apparition des messages */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Messages envoyés par moi */
-  .message.me {
-    margin-left: auto;
-    background: linear-gradient(135deg, #25D366, #128C34);
-    color: #121212;
-    border-bottom-right-radius: 5px;
-    font-weight: 600;
-    box-shadow: 0 5px 15px rgba(37, 211, 102, 0.5);
-  }
-
-  /* Messages reçus */
-  .message.other {
-    margin-right: auto;
-    background: #262626;
-    color: #eee;
-    border-bottom-left-radius: 5px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
-  }
-
-  /* Nom utilisateur au dessus du message */
-  .username {
-    font-weight: 700;
-    font-size: 0.8rem;
-    margin-bottom: 6px;
-    opacity: 0.7;
-    user-select: none;
-  }
-
-  /* Zone de saisie */
-  #input-area {
-    display: flex;
-    padding: 15px 20px;
-    background: #121212;
-    border-top: 1px solid #333;
-  }
-
-  #message-input {
-    flex: 1;
-    font-size: 1.1rem;
-    padding: 14px 20px;
-    border-radius: 30px;
-    border: none;
-    outline: none;
-    background: #222;
-    color: #eee;
-    box-shadow: inset 0 0 10px #000;
-    transition: background-color 0.3s ease;
-  }
-  #message-input::placeholder {
-    color: #888;
-  }
-  #message-input:focus {
-    background-color: #25d36620;
-    box-shadow: inset 0 0 15px #25d366aa;
-  }
-
-  #send-btn {
-    background: #25D366;
-    border: none;
-    color: #121212;
-    font-weight: 700;
-    padding: 0 25px;
-    margin-left: 15px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 15px #25d366bb;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  #send-btn:hover {
-    background-color: #128C34;
-    transform: scale(1.05);
-  }
-  #send-btn:active {
-    transform: scale(0.95);
-  }
-
-  /* Zone pseudo */
-  #username-area {
-    background: #121212dd;
-    padding: 40px 30px;
-    text-align: center;
-    border-radius: 25px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-    max-width: 400px;
-    margin: 60px auto;
-  }
-  #username-input {
-    width: 100%;
-    max-width: 320px;
-    padding: 16px 25px;
-    font-size: 1.2rem;
-    border-radius: 40px;
-    border: none;
-    outline: none;
-    background: #333;
-    color: #eee;
-    box-shadow: inset 0 0 12px #000;
-    transition: background-color 0.3s ease;
-    margin-bottom: 25px;
-  }
-  #username-input::placeholder {
-    color: #888;
-  }
-  #username-input:focus {
-    background-color: #25d36620;
-    box-shadow: inset 0 0 15px #25d366aa;
-  }
-  #username-btn {
-    background: #25D366;
-    border: none;
-    color: #121212;
-    font-weight: 800;
-    padding: 16px 50px;
-    border-radius: 40px;
-    cursor: pointer;
-    font-size: 1.3rem;
-    box-shadow: 0 6px 20px #25d366cc;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  #username-btn:hover {
-    background: #128C34;
-    transform: scale(1.07);
-  }
-  #username-btn:active {
-    transform: scale(0.95);
-  }
-
-  /* Responsive - mobile */
-  @media (max-width: 480px) {
-    header {
-      font-size: 1.4rem;
-      padding: 15px 10px;
-    }
-    #username-area {
-      padding: 30px 20px;
-      max-width: 90%;
-      margin: 40px auto;
-    }
-    #username-input {
-      font-size: 1rem;
-      padding: 12px 18px;
-    }
-    #username-btn {
-      font-size: 1.1rem;
-      padding: 14px 40px;
-    }
-    #message-input {
-      font-size: 1rem;
-      padding: 12px 15px;
-    }
-    #send-btn {
-      font-size: 1rem;
-      padding: 0 20px;
-      margin-left: 10px;
-    }
-  }
-</style>
-
-<header>SpirtyChat 💬</header>
-
-<div id="chat-container" style="display:none;">
-  <div id="messages"></div>
-  <div id="input-area">
-    <input id="message-input" type="text" placeholder="Écris un message..." autocomplete="off" />
-    <button id="send-btn">Envoyer</button>
-  </div>
-</div>
-
-<div id="username-area">
-  <input id="username-input" type="text" placeholder="Entre ton pseudo" autocomplete="off" />
-  <br/>
-  <button id="username-btn">Entrer dans le chat</button>
-</div>
-
-<script>
-  // URL backend — adapte avec ton IP / domaine
-  const apiUrl = '/messages';
-
-  const usernameArea = document.getElementById('username-area');
-  const chatContainer = document.getElementById('chat-container');
-  const usernameInput = document.getElementById('username-input');
-  const usernameBtn = document.getElementById('username-btn');
-  const messagesDiv = document.getElementById('messages');
-  const messageInput = document.getElementById('message-input');
-  const sendBtn = document.getElementById('send-btn');
-
-  let username = localStorage.getItem('username');
-
-  function showChat() {
-    usernameArea.style.display = 'none';
-    chatContainer.style.display = 'flex';
-    messageInput.focus();
-  }
-
-  function showUsernameForm() {
-    usernameArea.style.display = 'block';
-    chatContainer.style.display = 'none';
-    usernameInput.focus();
-  }
-
-  if (username) {
-    showChat();
-  } else {
-    showUsernameForm();
-  }
-
-  usernameBtn.onclick = () => {
-    const name = usernameInput.value.trim();
-    if (!name) {
-      alert('Entre un pseudo valide !');
-      return;
-    }
-    username = name;
-    localStorage.setItem('username', username);
-    showChat();
-    fetchMessages();
-  };
-
-  sendBtn.onclick = sendMessage;
-
-  messageInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  });
-
-  async function fetchMessages() {
-    try {
-      const res = await fetch(apiUrl);
-      if (!res.ok) throw new Error('Erreur de récupération');
-      const data = await res.json();
-
-      messagesDiv.innerHTML = '';
-      data.forEach(msg => {
-        const div = document.createElement('div');
-        div.classList.add('message');
-        if (msg.username === username) {
-          div.classList.add('me');
-        } else {
-          div.classList.add('other');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveUp BF</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1E3A8A;
+            --secondary-color: #3B82F6;
+            --accent-color: #10B981;
+            --danger-color: #EF4444;
+            --warning-color: #F59E0B;
+            --light-gray: #F3F4F6;
+            --dark-gray: #4B5563;
+            --white: #FFFFFF;
+            --black: #111827;
+            --admin-color: #8B5CF6;
         }
-        const usernameDiv = document.createElement('div');
-        usernameDiv.classList.add('username');
-        usernameDiv.textContent = msg.username;
-        div.appendChild(usernameDiv);
-        const textDiv = document.createElement('div');
-        textDiv.textContent = msg.message;
-        div.appendChild(textDiv);
-        messagesDiv.appendChild(div);
-      });
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-    } catch (e) {
-      console.error(e);
-    }
-  }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-  async function sendMessage() {
-    const message = messageInput.value.trim();
-    if (!message) return;
-    try {
-      await fetch(apiUrl, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({username, message})
-      });
-      messageInput.value = '';
-      fetchMessages();
-    } catch(e) {
-      console.error('Erreur en envoyant', e);
-    }
-  }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
 
-  setInterval(fetchMessages, 2000);
-</script>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
+        .toast {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #15296d;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-admin {
+            background-color: var(--admin-color);
+            color: white;
+        }
+
+        #presentation-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: white;
+            text-align: center;
+        }
+
+        .presentation-content {
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .presentation-logo-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .presentation-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .presentation-text {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .presentation-creator {
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .btn-presentation {
+            background-color: white;
+            color: var(--primary-color);
+            padding: 14px 28px;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-presentation:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .app-container {
+            display: none;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 70px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+        }
+
+        .app-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-badge {
+            background-color: var(--admin-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .page {
+            display: none;
+            padding: 20px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-card p {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .stat-income {
+            color: var(--accent-color);
+        }
+
+        .stat-expense {
+            color: var(--danger-color);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .action-btn {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .recent-transactions {
+            margin: 25px 0;
+        }
+
+        .recent-transactions h3 {
+            margin-bottom: 15px;
+            color: var(--dark-gray);
+        }
+
+        .transaction {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-income {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .transaction-expense {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .transaction-details {
+            color: var(--dark-gray);
+            margin-bottom: 5px;
+        }
+
+        .transaction-date {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .transaction-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-container {
+            background-color: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .expense-category-container {
+            margin-bottom: 15px;
+        }
+
+        .expense-category-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .expense-category-bar {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .expense-category-progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            background-color: rgba(30, 58, 138, 0.1);
+            color: var(--primary-color);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+        }
+
+        #reader {
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .admin-panel {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .admin-section {
+            margin-bottom: 30px;
+        }
+
+        .admin-section h3 {
+            margin-bottom: 15px;
+            color: var(--admin-color);
+            border-bottom: 2px solid var(--admin-color);
+            padding-bottom: 8px;
+        }
+
+        .request-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .request-amount {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .request-details {
+            color: var(--dark-gray);
+            margin-bottom: 10px;
+        }
+
+        .request-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-approved {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-rejected {
+            background-color: #FEE2E2;
+            color: #B91C1C;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 500px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="modal-overlay" id="confirmation-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmation</h3>
+                <button class="modal-close" onclick="closeModal('confirmation-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-message">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('confirmation-modal')">Annuler</button>
+                <button class="btn btn-primary" id="confirmation-action-btn">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="presentation-screen">
+        <div class="presentation-content">
+            <img src="https://via.placeholder.com/100x100/1E3A8A/FFFFFF?text=SB" alt="SaveUp BF Logo" class="presentation-logo-img" id="app-logo">
+            <h1 class="presentation-title">SaveUp BF</h1>
+            <p class="presentation-text">
+                ✨ SaveUp BF – Ton argent, ta liberté ! Gère facilement tes revenus et dépenses, sécurise tes fonds et organise tes projets sans stress. Simple, rapide et pensé pour le quotidien au Burkina Faso 🇧🇫.
+            </p>
+            <p class="presentation-creator">Créé par |Abdoul Dev| dispo sur Wa au +22603996469</p>
+            <button class="btn-presentation" onclick="startApp()">Commencer</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div id="login-page" class="page active">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                </div>
+            </header>
+
+            <div class="form-container">
+                <h2>Connexion</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Numéro de téléphone</label>
+                    <input class="form-input" id="login-phone" type="tel" placeholder="+226XXXXXXXX" required>
+                </div>
+                
+                <div class="form-group" id="admin-password-group" style="display: none;">
+                    <label class="form-label">Mot de passe administrateur</label>
+                    <input class="form-input" id="admin-password" type="password" placeholder="Mot de passe admin">
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="loginUser()">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+                
+                <p style="text-align: center; margin-top: 20px;">
+                    Pas encore de compte? <a href="javascript:void(0)" onclick="showPage('register-page')">Créer un compte</a>
+                </p>
+            </div>
+        </div>
+
+        <div id="register-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                </div>
+            </header>
+
+            <div class="form-container">
+                <h2>Créer un compte</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Numéro de téléphone</label>
+                    <input class="form-input" id="register-phone" type="tel" placeholder="+226XXXXXXXX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Nom complet</label>
+                    <input class="form-input" id="register-name" type="text" placeholder="Votre nom" required>
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="registerUser()">
+                    <i class="fas fa-user-plus"></i> Créer le compte
+                </button>
+                
+                <p style="text-align: center; margin-top: 20px;">
+                    Déjà un compte? <a href="javascript:void(0)" onclick="showPage('login-page')">Se connecter</a>
+                </p>
+            </div>
+        </div>
+
+        <div id="dashboard-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display">Utilisateur</span>
+                        <span id="admin-badge" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance">0 F</p>
+                </div>
+                <canvas id="balanceQR"></canvas>
+            </div>
+
+            <h2>Tableau de Bord</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Revenus</div>
+                    <div class="stat-value stat-income" id="total-income">0 F</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Dépenses</div>
+                    <div class="stat-value stat-expense" id="total-expense">0 F</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <div class="action-btn" onclick="showPage('income-page')">
+                    <i class="fas fa-plus-circle"></i>
+                    <div>Ajouter un revenu</div>
+                </div>
+                <div class="action-btn" onclick="showPage('expense-page')">
+                    <i class="fas fa-minus-circle"></i>
+                    <div>Ajouter une dépense</div>
+                </div>
+                <div class="action-btn" onclick="showPage('transfer-page')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <div>Transférer</div>
+                </div>
+                <div class="action-btn" onclick="showPage('mobile-money-page')">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div>Mobile Money</div>
+                </div>
+                <div class="action-btn" onclick="showPage('scanner-page')">
+                    <i class="fas fa-qrcode"></i>
+                    <div>Scanner</div>
+                </div>
+                <div class="action-btn" id="admin-dashboard-btn" style="display: none;" onclick="showPage('admin-page')">
+                    <i class="fas fa-cog"></i>
+                    <div>Administration</div>
+                </div>
+            </div>
+            
+            <div class="recent-transactions">
+                <h3>Dernières transactions</h3>
+                <div id="recent-transactions-list">
+                    <p>Aucune transaction enregistrée</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="income-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-income">Utilisateur</span>
+                        <span id="admin-badge-income" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-income">0 F</p>
+                </div>
+                <canvas id="balanceQR-income"></canvas>
+            </div>
+
+            <h2>Ajouter un Revenu</h2>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label class="form-label">Montant (F)</label>
+                    <input class="form-input" id="income-amount" type="number" placeholder="Entrez le montant" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Source</label>
+                    <input class="form-input" id="income-source" type="text" placeholder="Source du revenu" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input class="form-input" id="income-date" type="date" value="">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Note (optionnel)</label>
+                    <input class="form-input" id="income-note" type="text" placeholder="Note supplémentaire">
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="addIncome()">
+                    <i class="fas fa-check"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+
+        <div id="expense-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-expense">Utilisateur</span>
+                        <span id="admin-badge-expense" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-expense">0 F</p>
+                </div>
+                <canvas id="balanceQR-expense"></canvas>
+            </div>
+
+            <h2>Ajouter une Dépense</h2>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label class="form-label">Montant (F)</label>
+                    <input class="form-input" id="expense-amount" type="number" placeholder="Entrez le montant" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Catégorie</label>
+                    <select class="form-select" id="expense-category">
+                        <option value="Nourriture">Nourriture</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Santé">Santé</option>
+                        <option value="Communication">Communication</option>
+                        <option value="Loisirs">Loisirs</option>
+                        <option value="Éducation">Éducation</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input class="form-input" id="expense-date" type="date" value="">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Note (optionnel)</label>
+                    <input class="form-input" id="expense-note" type="text" placeholder="Note supplémentaire">
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="addExpense()">
+                    <i class="fas fa-check"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+
+        <div id="transfer-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-transfer">Utilisateur</span>
+                        <span id="admin-badge-transfer" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-transfer">0 F</p>
+                </div>
+                <canvas id="balanceQR-transfer"></canvas>
+            </div>
+
+            <h2>Transfert d'argent</h2>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label class="form-label">Numéro du destinataire</label>
+                    <input class="form-input" id="transfer-recipient" type="tel" placeholder="+226XXXXXXXX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Montant à transférer (F)</label>
+                    <input class="form-input" id="transfer-amount" type="number" placeholder="Entrez le montant" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Note (optionnel)</label>
+                    <input class="form-input" id="transfer-note" type="text" placeholder="Raison du transfert">
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="makeTransfer()">
+                    <i class="fas fa-paper-plane"></i> Transférer
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-money-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-mobile">Utilisateur</span>
+                        <span id="admin-badge-mobile" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-mobile">0 F</p>
+                </div>
+                <canvas id="balanceQR-mobile"></canvas>
+            </div>
+
+            <h2>Services Mobile Money</h2>
+            
+            <div class="form-container">
+                <div class="quick-actions">
+                    <div class="action-btn" onclick="showDepositRequest()">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div>Demander un dépôt</div>
+                    </div>
+                    <div class="action-btn" onclick="showWithdrawRequest()">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <div>Demander un retrait</div>
+                    </div>
+                </div>
+                
+                <div id="deposit-request-form" style="display: none;">
+                    <h3>Demande de dépôt Orange Money</h3>
+                    <div class="form-group">
+                        <label class="form-label">Montant à déposer (F)</label>
+                        <input class="form-input" id="deposit-amount" type="number" placeholder="Entrez le montant" min="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Numéro de transaction Orange Money</label>
+                        <input class="form-input" id="deposit-proof" type="text" placeholder="Numéro de transaction" required>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-block" onclick="requestDeposit()">
+                        <i class="fas fa-check"></i> Envoyer la demande
+                    </button>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--dark-gray);">
+                        <i class="fas fa-info-circle"></i> Après avoir fait le transfert Orange Money vers le numéro +22656967818, entrez le numéro de transaction ici. Votre compte sera crédité après validation par l'administrateur.
+                    </p>
+                </div>
+                
+                <div id="withdraw-request-form" style="display: none;">
+                    <h3>Demande de retrait Orange Money</h3>
+                    <div class="form-group">
+                        <label class="form-label">Montant à retirer (F)</label>
+                        <input class="form-input" id="withdraw-amount" type="number" placeholder="Entrez le montant" min="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Votre numéro Orange Money</label>
+                        <input class="form-input" id="withdraw-phone" type="tel" placeholder="+226XXXXXXXX" required>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-block" onclick="requestWithdraw()">
+                        <i class="fas fa-check"></i> Envoyer la demande
+                    </button>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--dark-gray);">
+                        <i class="fas fa-info-circle"></i> Le retrait sera effectué sur le numéro Orange Money que vous avez indiqué après validation par l'administrateur.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="transactions-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-transactions">Utilisateur</span>
+                        <span id="admin-badge-transactions" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-transactions">0 F</p>
+                </div>
+                <canvas id="balanceQR-transactions"></canvas>
+            </div>
+
+            <h2>Historique des Transactions</h2>
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterTransactions('all')">Toutes</button>
+                <button class="filter-btn" onclick="filterTransactions('income')">Revenus</button>
+                <button class="filter-btn" onclick="filterTransactions('expense')">Dépenses</button>
+                <button class="filter-btn" onclick="filterTransactions('transfer')">Transferts</button>
+            </div>
+            
+            <div class="transactions-list" id="transactions-list">
+                <p>Aucune transaction enregistrée</p>
+            </div>
+        </div>
+
+        <div id="stats-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-stats">Utilisateur</span>
+                        <span id="admin-badge-stats" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-stats">0 F</p>
+                </div>
+                <canvas id="balanceQR-stats"></canvas>
+            </div>
+
+            <h2>Statistiques</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Solde total</div>
+                    <div class="stat-value" id="stats-balance">0 F</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Revenus totaux</div>
+                    <div class="stat-value stat-income" id="stats-income">0 F</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Dépenses totales</div>
+                    <div class="stat-value stat-expense" id="stats-expense">0 F</div>
+                </div>
+            </div>
+            
+            <div class="recent-transactions">
+                <h3>Dépenses par catégorie</h3>
+                <div id="expenses-by-category">
+                    <p>Aucune donnée de dépenses</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-admin">Utilisateur</span>
+                        <span id="admin-badge-admin" class="admin-badge">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-admin">0 F</p>
+                </div>
+                <canvas id="balanceQR-admin"></canvas>
+            </div>
+
+            <h2>Administration</h2>
+            
+            <div class="admin-panel">
+                <div class="admin-section">
+                    <h3>Demandes de dépôt en attente</h3>
+                    <div id="pending-deposits">
+                        <p>Chargement des demandes...</p>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Demandes de retrait en attente</h3>
+                    <div id="pending-withdrawals">
+                        <p>Chargement des demandes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="scanner-page" class="page">
+            <header>
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <img src="https://via.placeholder.com/32x32/1E3A8A/FFFFFF?text=SB" alt="Logo" class="app-logo">
+                        SaveUp BF
+                    </h1>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span id="username-display-scanner">Utilisateur</span>
+                        <span id="admin-badge-scanner" class="admin-badge" style="display: none;">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="balance-card">
+                <div class="balance-info">
+                    <div class="balance-label">Votre solde</div>
+                    <p id="balance-scanner">0 F</p>
+                </div>
+                <canvas id="balanceQR-scanner"></canvas>
+            </div>
+
+            <h2>Scanner un QR Code</h2>
+            
+            <div class="form-container">
+                <p>Scannez un QR Code de transaction pour l'ajouter à votre historique.</p>
+                
+                <div id="reader"></div>
+                <div id="scan-result"></div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-container">
+                <div class="nav-item active" onclick="showPage('dashboard-page')">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-label">Accueil</span>
+                </div>
+                <div class="nav-item" onclick="showPage('income-page')">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="nav-label">Revenu</span>
+                </div>
+                <div class="nav-item" onclick="showPage('expense-page')">
+                    <i class="fas fa-minus-circle"></i>
+                    <span class="nav-label">Dépense</span>
+                </div>
+                <div class="nav-item" onclick="showPage('transactions-page')">
+                    <i class="fas fa-history"></i>
+                    <span class="nav-label">Historique</span>
+                </div>
+                <div class="nav-item" onclick="showPage('stats-page')">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-label">Stats</span>
+                </div>
+                <div class="nav-item" id="admin-nav-item" style="display: none;" onclick="showPage('admin-page')">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-label">Admin</span>
+                </div>
+                <div class="nav-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-label">Déconnexion</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration de l'API
+        const API_BASE_URL = 'http://localhost:5000';
+        const ADMIN_PHONE = '+22656967818';
+        const ADMIN_PASSWORD = '555555';
+        
+        let transactions = [];
+        let categories = ["Nourriture", "Transport", "Santé", "Communication", "Loisirs", "Éducation", "Autre"];
+        let currentPage = 'login-page';
+        let currentFilter = 'all';
+        let html5QrCode = null;
+        let userPhone = localStorage.getItem('userPhone') || '';
+        let userName = localStorage.getItem('userName') || 'Utilisateur';
+        let isAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        // Fonctions utilitaires
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'check-circle';
+            if (type === 'error') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+            
+            toast.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toastContainer.removeChild(toast), 300);
+            }, 3000);
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        function confirmAction(message, callback) {
+            document.getElementById('confirmation-message').textContent = message;
+            const btn = document.getElementById('confirmation-action-btn');
+            
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', function() {
+                closeModal('confirmation-modal');
+                callback();
+            });
+            
+            openModal('confirmation-modal');
+        }
+        
+        function formatDate(dateString) {
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('fr-FR', options);
+        }
+        
+        // Fonctions d'authentification
+        function loginUser() {
+            const phone = document.getElementById('login-phone').value;
+            const password = document.getElementById('admin-password').value;
+            
+            if (!phone) {
+                showToast("Veuillez entrer votre numéro de téléphone", "error");
+                return;
+            }
+            
+            // Vérifier si c'est l'admin
+            if (phone === ADMIN_PHONE) {
+                if (password !== ADMIN_PASSWORD) {
+                    showToast("Mot de passe administrateur incorrect", "error");
+                    return;
+                }
+                isAdmin = true;
+                localStorage.setItem('isAdmin', 'true');
+            } else {
+                isAdmin = false;
+                localStorage.setItem('isAdmin', 'false');
+            }
+            
+            fetch(`${API_BASE_URL}/get_balance/${phone}`)
+                .then(response => {
+                    if (response.status === 404) {
+                        showToast("Aucun compte trouvé avec ce numéro", "error");
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.status === 'success') {
+                        userPhone = phone;
+                        localStorage.setItem('userPhone', userPhone);
+                        
+                        // Récupérer le nom de l'utilisateur
+                        userName = `Utilisateur ${phone}`;
+                        localStorage.setItem('userName', userName);
+                        updateUserDisplay();
+                        
+                        showToast("Connexion réussie");
+                        showPage('dashboard-page');
+                        updateAllBalances();
+                    } else if (data && data.status === 'error') {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de connexion au serveur', 'error');
+                });
+        }
+        
+        function registerUser() {
+            const phone = document.getElementById('register-phone').value;
+            const name = document.getElementById('register-name').value;
+            
+            if (!phone || !name) {
+                showToast("Veuillez remplir tous les champs", "error");
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/create_user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: phone,
+                    name: name
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    userPhone = phone;
+                    userName = name;
+                    localStorage.setItem('userPhone', userPhone);
+                    localStorage.setItem('userName', userName);
+                    updateUserDisplay();
+                    
+                    showToast(data.message);
+                    showPage('dashboard-page');
+                    updateAllBalances();
+                } else {
+                    showToast(data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+            });
+        }
+        
+        function logout() {
+            userPhone = '';
+            userName = 'Utilisateur';
+            isAdmin = false;
+            localStorage.removeItem('userPhone');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('isAdmin');
+            transactions = [];
+            showPage('login-page');
+        }
+        
+        function updateUserDisplay() {
+            document.querySelectorAll('[id^="username-display"]').forEach(el => {
+                el.textContent = userName;
+            });
+            
+            document.querySelectorAll('[id^="admin-badge"]').forEach(el => {
+                el.style.display = isAdmin ? 'block' : 'none';
+            });
+            
+            document.getElementById('admin-dashboard-btn').style.display = isAdmin ? 'block' : 'none';
+            document.getElementById('admin-nav-item').style.display = isAdmin ? 'flex' : 'none';
+            
+            // Afficher le champ mot de passe admin si numéro admin
+            const loginPhone = document.getElementById('login-phone');
+            const adminPasswordGroup = document.getElementById('admin-password-group');
+            
+            if (loginPhone) {
+                loginPhone.addEventListener('input', function() {
+                    adminPasswordGroup.style.display = this.value === ADMIN_PHONE ? 'block' : 'none';
+                });
+            }
+        }
+        
+        // Fonctions de gestion des transactions
+        function addIncome() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            let amount = parseFloat(document.getElementById('income-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Veuillez entrer un montant valide !", "error");
+                return;
+            }
+            
+            let source = document.getElementById('income-source').value;
+            if (!source.trim()) {
+                showToast("Veuillez spécifier une source !", "error");
+                return;
+            }
+            
+            let date = document.getElementById('income-date').value;
+            let note = document.getElementById('income-note').value;
+            
+            fetch(`${API_BASE_URL}/add_income`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: userPhone,
+                    amount: amount,
+                    source: source,
+                    note: note,
+                    date: date
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message);
+                    updateAllBalances();
+                    updateDashboard();
+                    showPage('dashboard-page');
+                    
+                    document.getElementById('income-amount').value = '';
+                    document.getElementById('income-source').value = '';
+                    document.getElementById('income-note').value = '';
+                } else {
+                    showToast(data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+            });
+        }
+        
+        function addExpense() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            let amount = parseFloat(document.getElementById('expense-amount').value);
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Veuillez entrer un montant valide !", "error");
+                return;
+            }
+            
+            let category = document.getElementById('expense-category').value;
+            let date = document.getElementById('expense-date').value;
+            let note = document.getElementById('expense-note').value;
+            
+            fetch(`${API_BASE_URL}/add_expense`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: userPhone,
+                    amount: amount,
+                    category: category,
+                    note: note,
+                    date: date
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message);
+                    updateAllBalances();
+                    updateDashboard();
+                    showPage('dashboard-page');
+                    
+                    document.getElementById('expense-amount').value = '';
+                    document.getElementById('expense-note').value = '';
+                } else {
+                    showToast(data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+            });
+        }
+        
+        function makeTransfer() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            let recipient = document.getElementById('transfer-recipient').value;
+            let amount = parseFloat(document.getElementById('transfer-amount').value);
+            let note = document.getElementById('transfer-note').value;
+            
+            if (!recipient) {
+                showToast("Veuillez entrer le numéro du destinataire", "error");
+                return;
+            }
+            
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Veuillez entrer un montant valide !", "error");
+                return;
+            }
+            
+            if (recipient === userPhone) {
+                showToast("Vous ne pouvez pas transférer à vous-même", "error");
+                return;
+            }
+            
+            // Vérifier d'abord si le destinataire existe
+            fetch(`${API_BASE_URL}/get_balance/${recipient}`)
+                .then(response => {
+                    if (response.status === 404) {
+                        showToast("Le destinataire n'existe pas", "error");
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.status === 'success') {
+                        // Le destinataire existe, procéder au transfert
+                        confirmAction(`Êtes-vous sûr de vouloir transférer ${amount} F à ${recipient}?`, function() {
+                            // D'abord, enregistrer la dépense pour l'expéditeur
+                            fetch(`${API_BASE_URL}/add_expense`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    phone_number: userPhone,
+                                    amount: amount,
+                                    category: "Transfert",
+                                    note: `Transfert à ${recipient}` + (note ? `: ${note}` : ''),
+                                    date: new Date().toISOString().split('T')[0]
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    // Ensuite, enregistrer le revenu pour le destinataire
+                                    fetch(`${API_BASE_URL}/add_income`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            phone_number: recipient,
+                                            amount: amount,
+                                            source: "Transfert",
+                                            note: `Transfert de ${userPhone}` + (note ? `: ${note}` : ''),
+                                            date: new Date().toISOString().split('T')[0]
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === 'success') {
+                                            showToast("Transfert effectué avec succès");
+                                            updateAllBalances();
+                                            updateDashboard();
+                                            showPage('dashboard-page');
+                                            
+                                            document.getElementById('transfer-recipient').value = '';
+                                            document.getElementById('transfer-amount').value = '';
+                                            document.getElementById('transfer-note').value = '';
+                                        } else {
+                                            showToast("Erreur lors du crédit du destinataire", "error");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Erreur:', error);
+                                        showToast('Erreur de connexion au serveur', 'error');
+                                    });
+                                } else {
+                                    showToast("Erreur lors du débit", "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erreur:', error);
+                                showToast('Erreur de connexion au serveur', 'error');
+                            });
+                        });
+                    } else if (data && data.status === 'error') {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de connexion au serveur', 'error');
+                });
+        }
+        
+        // Fonctions pour Mobile Money
+        function showDepositRequest() {
+            document.getElementById('deposit-request-form').style.display = 'block';
+            document.getElementById('withdraw-request-form').style.display = 'none';
+        }
+        
+        function showWithdrawRequest() {
+            document.getElementById('withdraw-request-form').style.display = 'block';
+            document.getElementById('deposit-request-form').style.display = 'none';
+        }
+        
+        function requestDeposit() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            let amount = parseFloat(document.getElementById('deposit-amount').value);
+            let proof = document.getElementById('deposit-proof').value;
+            
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Veuillez entrer un montant valide !", "error");
+                return;
+            }
+            
+            if (!proof) {
+                showToast("Veuillez entrer le numéro de transaction", "error");
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/request_deposit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: userPhone,
+                    amount: amount,
+                    transaction_proof: proof
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message);
+                    document.getElementById('deposit-amount').value = '';
+                    document.getElementById('deposit-proof').value = '';
+                } else {
+                    showToast(data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+            });
+        }
+        
+        function requestWithdraw() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            let amount = parseFloat(document.getElementById('withdraw-amount').value);
+            let phone = document.getElementById('withdraw-phone').value;
+            
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Veuillez entrer un montant valide !", "error");
+                return;
+            }
+            
+            if (!phone) {
+                showToast("Veuillez entrer votre numéro Orange Money", "error");
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/request_withdraw`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: userPhone,
+                    amount: amount,
+                    transaction_proof: phone
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message);
+                    document.getElementById('withdraw-amount').value = '';
+                    document.getElementById('withdraw-phone').value = '';
+                } else {
+                    showToast(data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur de connexion au serveur', 'error');
+            });
+        }
+        
+        // Fonctions d'administration
+        function loadAdminRequests() {
+            if (!isAdmin) return;
+            
+            // Charger les demandes de dépôt
+            fetch(`${API_BASE_URL}/admin/deposits`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const depositsContainer = document.getElementById('pending-deposits');
+                        if (data.data.deposits.length > 0) {
+                            let html = '';
+                            data.data.deposits.forEach(deposit => {
+                                html += `
+                                    <div class="request-item">
+                                        <div class="request-header">
+                                            <div class="request-amount">${deposit.amount} F</div>
+                                            <span class="request-status status-${deposit.status}">${deposit.status}</span>
+                                        </div>
+                                        <div class="request-details">
+                                            <p><strong>Numéro:</strong> ${deposit.phone_number}</p>
+                                            <p><strong>Nom:</strong> ${deposit.user_name}</p>
+                                            <p><strong>Preuve:</strong> ${deposit.transaction_proof}</p>
+                                            <p><strong>Date:</strong> ${formatDate(deposit.created_at)}</p>
+                                        </div>
+                                        ${deposit.status === 'pending' ? `
+                                        <div class="request-actions">
+                                            <button class="btn btn-success" onclick="approveDeposit(${deposit.id})">Approuver</button>
+                                            <button class="btn btn-danger" onclick="rejectDeposit(${deposit.id})">Rejeter</button>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            });
+                            depositsContainer.innerHTML = html;
+                        } else {
+                            depositsContainer.innerHTML = '<p>Aucune demande de dépôt en attente</p>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+            
+            // Charger les demandes de retrait
+            fetch(`${API_BASE_URL}/admin/withdraws`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const withdrawalsContainer = document.getElementById('pending-withdrawals');
+                        if (data.data.withdraws.length > 0) {
+                            let html = '';
+                            data.data.withdraws.forEach(withdraw => {
+                                html += `
+                                    <div class="request-item">
+                                        <div class="request-header">
+                                            <div class="request-amount">${withdraw.amount} F</div>
+                                            <span class="request-status status-${withdraw.status}">${withdraw.status}</span>
+                                        </div>
+                                        <div class="request-details">
+                                            <p><strong>Numéro:</strong> ${withdraw.phone_number}</p>
+                                            <p><strong>Nom:</strong> ${withdraw.user_name}</p>
+                                            <p><strong>Orange Money:</strong> ${withdraw.transaction_proof}</p>
+                                            <p><strong>Date:</strong> ${formatDate(withdraw.created_at)}</p>
+                                        </div>
+                                        ${withdraw.status === 'pending' ? `
+                                        <div class="request-actions">
+                                            <button class="btn btn-success" onclick="approveWithdraw(${withdraw.id})">Approuver</button>
+                                            <button class="btn btn-danger" onclick="rejectWithdraw(${withdraw.id})">Rejeter</button>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            });
+                            withdrawalsContainer.innerHTML = html;
+                        } else {
+                            withdrawalsContainer.innerHTML = '<p>Aucune demande de retrait en attente</p>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+        }
+        
+        function approveDeposit(depositId) {
+            confirmAction("Êtes-vous sûr de vouloir approuver ce dépôt?", function() {
+                fetch(`${API_BASE_URL}/admin/approve_deposit/${depositId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message);
+                        loadAdminRequests();
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de connexion au serveur', 'error');
+                });
+            });
+        }
+        
+        function rejectDeposit(depositId) {
+            confirmAction("Êtes-vous sûr de vouloir rejeter ce dépôt?", function() {
+                fetch(`${API_BASE_URL}/admin/reject_deposit/${depositId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message);
+                        loadAdminRequests();
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de connexion au serveur', 'error');
+                });
+            });
+        }
+        
+        function approveWithdraw(withdrawId) {
+            confirmAction("Êtes-vous sûr de vouloir approuver ce retrait?", function() {
+                fetch(`${API_BASE_URL}/admin/approve_withdraw/${withdrawId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message);
+                        loadAdminRequests();
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de connexion au serveur', 'error');
+                });
+            });
+        }
+        
+        function rejectWithdraw(withdrawId) {
+            confirmAction("Êtes-vous sûr de vouloir rejeter ce retrait?", function() {
+                fetch(`${API_BASE_URL}/admin/reject_withdraw/${withdrawId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message);
+                        loadAdminRequests();
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showToast('Erreur de connexion au serveur', 'error');
+                });
+            });
+        }
+        
+        function updateAllBalances() {
+            if (!userPhone) return;
+            
+            fetch(`${API_BASE_URL}/get_balance/${userPhone}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const balance = data.data.balance;
+                        transactions = data.data.transactions;
+                        
+                        document.querySelectorAll('[id^="balance"]').forEach(el => {
+                            if (el.id !== 'balanceQR' && !el.id.includes('QR')) {
+                                el.innerText = `${balance} F`;
+                            }
+                        });
+                        
+                        // Mettre à jour les totaux de revenus et dépenses
+                        let income = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+                        let expense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+                        
+                        document.getElementById('total-income').innerText = `${income} F`;
+                        document.getElementById('total-expense').innerText = `${expense} F`;
+                        
+                        // Générer le QR code du solde
+                        let qrText = `Solde: ${balance} F\nRevenus: ${income} F\nDépenses: ${expense} F\nTransactions: ${transactions.length}`;
+                        
+                        try {
+                            const canvas = document.getElementById('balanceQR');
+                            const ctx = canvas.getContext('2d');
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            
+                            QRCode.toCanvas(document.getElementById('balanceQR'), qrText, {
+                                width: 120,
+                                margin: 1,
+                                color: {
+                                    dark: '#000000',
+                                    light: '#FFFFFF'
+                                }
+                            }, function(error) {
+                                if (error) console.error(error);
+                            });
+                        } catch (error) {
+                            console.error("Erreur lors de la génération du QR code:", error);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+        }
+        
+        function updateDashboard() {
+            if (!userPhone) return;
+            
+            fetch(`${API_BASE_URL}/get_balance/${userPhone}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        transactions = data.data.transactions;
+                        
+                        const recentTransactions = transactions.slice(-5).reverse();
+                        const transactionsList = document.getElementById('recent-transactions-list');
+                        
+                        if (recentTransactions.length > 0) {
+                            let html = '';
+                            recentTransactions.forEach(t => {
+                                html += `
+                                    <div class="transaction ${t.type === 'income' ? 'transaction-income' : 'transaction-expense'}">
+                                        <div class="transaction-info">
+                                            <div class="transaction-amount">${t.amount} F</div>
+                                            <div class="transaction-details">
+                                                ${t.type === 'income' ? 'Revenu' : 'Dépense'} - ${t.category}
+                                                ${t.note ? `<br><small>${t.note}</small>` : ''}
+                                            </div>
+                                            <div class="transaction-date">${formatDate(t.date)}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            transactionsList.innerHTML = html;
+                        } else {
+                            transactionsList.innerHTML = `<p>Aucune transaction enregistrée</p>`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+        }
+        
+        function showTransactions() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/get_balance/${userPhone}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        transactions = data.data.transactions;
+                        
+                        let filteredTransactions = [...transactions];
+                        if (currentFilter === 'income') {
+                            filteredTransactions = filteredTransactions.filter(t => t.type === 'income');
+                        } else if (currentFilter === 'expense') {
+                            filteredTransactions = filteredTransactions.filter(t => t.type === 'expense');
+                        } else if (currentFilter === 'transfer') {
+                            filteredTransactions = filteredTransactions.filter(t => t.category === 'Transfert');
+                        }
+                        
+                        filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        
+                        const transactionsList = document.getElementById('transactions-list');
+                        
+                        if (filteredTransactions.length > 0) {
+                            let html = '';
+                            filteredTransactions.forEach(t => {
+                                html += `
+                                    <div class="transaction ${t.type === 'income' ? 'transaction-income' : 'transaction-expense'}">
+                                        <div class="transaction-info">
+                                            <div class="transaction-amount">${t.amount} F</div>
+                                            <div class="transaction-details">
+                                                ${t.type === 'income' ? 'Revenu' : 'Dépense'} - ${t.category}
+                                                ${t.note ? `<br><small>${t.note}</small>` : ''}
+                                            </div>
+                                            <div class="transaction-date">${formatDate(t.date)}</div>
+                                        </div>
+                                        <div class="transaction-actions">
+                                            <button class="btn btn-primary" onclick="generateQR(${t.id})" title="Générer QR Code">
+                                                <i class="fas fa-qrcode"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            transactionsList.innerHTML = html;
+                        } else {
+                            transactionsList.innerHTML = `<p>Aucune transaction enregistrée</p>`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+        }
+        
+        function filterTransactions(type) {
+            currentFilter = type;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.querySelector(`.filter-btn[onclick="filterTransactions('${type}')"]`).classList.add('active');
+            
+            showTransactions();
+        }
+        
+        function showStats() {
+            if (!userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                showPage('login-page');
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/get_balance/${userPhone}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        transactions = data.data.transactions;
+                        const balance = data.data.balance;
+                        
+                        let income = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+                        let expense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+                        
+                        document.getElementById('stats-balance').innerText = `${balance} F`;
+                        document.getElementById('stats-income').innerText = `${income} F`;
+                        document.getElementById('stats-expense').innerText = `${expense} F`;
+                        
+                        let totals = {};
+                        categories.forEach(c => totals[c] = 0);
+                        
+                        transactions.filter(t => t.type === 'expense').forEach(t => {
+                            if (totals[t.category] !== undefined) totals[t.category] += t.amount;
+                        });
+                        
+                        const expensesContainer = document.getElementById('expenses-by-category');
+                        let hasExpenses = Object.values(totals).some(amount => amount > 0);
+                        
+                        if (hasExpenses) {
+                            let html = '';
+                            for (let category in totals) {
+                                if (totals[category] > 0) {
+                                    const percentage = expense > 0 ? Math.round((totals[category] / expense) * 100) : 0;
+                                    html += `
+                                        <div class="expense-category-container">
+                                            <div class="expense-category-row">
+                                                <span>${category}</span>
+                                                <span>${totals[category]} F (${percentage}%)</span>
+                                            </div>
+                                            <div class="expense-category-bar">
+                                                <div class="expense-category-progress" style="width: ${percentage}%;"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            }
+                            expensesContainer.innerHTML = html;
+                        } else {
+                            expensesContainer.innerHTML = `<p>Aucune donnée de dépenses</p>`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+        }
+        
+        function generateQR(id) {
+            const transaction = transactions.find(t => t.id === id);
+            if (!transaction) return;
+            
+            const text = JSON.stringify(transaction);
+            
+            const width = 300;
+            const height = 350;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            const qrWindow = window.open('', '_blank', `width=${width},height=${height},top=${top},left=${left}`);
+            
+            qrWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>QR Code Transaction</title>
+                    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"><\/script>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            height: 100vh;
+                            margin: 0;
+                            padding: 20px;
+                            text-align: center;
+                        }
+                        #qrcode {
+                            margin: 20px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>QR Code Transaction</h2>
+                    <div id="qrcode"></div>
+                    <script>
+                        window.onload = function() {
+                            QRCode.toCanvas(document.getElementById('qrcode'), \`${text}\`, {
+                                width: 200,
+                                margin: 1,
+                                color: {
+                                    dark: '#000000',
+                                    light: '#FFFFFF'
+                                }
+                            }, function(err) {
+                                if (err) console.error(err);
+                            });
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            qrWindow.document.close();
+        }
+        
+        function initScanner() {
+            const scannerContainer = document.getElementById('reader');
+            scannerContainer.innerHTML = '';
+            
+            if (typeof Html5Qrcode === 'undefined') {
+                scannerContainer.innerHTML = `<p>Erreur de chargement du scanner QR. Veuillez rafraîchir la page.</p>`;
+                return;
+            }
+            
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop();
+            }
+            
+            html5QrCode = new Html5Qrcode("reader");
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    document.getElementById('scan-result').style.display = 'block';
+                    document.getElementById('scan-result').innerHTML = `
+                        <p>QR Code scanné avec succès !</p>
+                        <p><strong>Contenu:</strong> ${decodedText}</p>
+                    `;
+                    
+                    try {
+                        const transactionData = JSON.parse(decodedText);
+                        if (transactionData.amount && transactionData.type) {
+                            confirmAction("Voulez-vous importer cette transaction ?", function() {
+                                if (transactionData.type === 'income') {
+                                    fetch(`${API_BASE_URL}/add_income`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            phone_number: userPhone,
+                                            amount: transactionData.amount,
+                                            source: transactionData.category,
+                                            note: transactionData.note,
+                                            date: transactionData.date
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === 'success') {
+                                            showToast("Transaction importée avec succès !");
+                                            updateAllBalances();
+                                        } else {
+                                            showToast(data.message, "error");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Erreur:', error);
+                                        showToast('Erreur de connexion au serveur', 'error');
+                                    });
+                                } else if (transactionData.type === 'expense') {
+                                    fetch(`${API_BASE_URL}/add_expense`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            phone_number: userPhone,
+                                            amount: transactionData.amount,
+                                            category: transactionData.category,
+                                            note: transactionData.note,
+                                            date: transactionData.date
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === 'success') {
+                                            showToast("Transaction importée avec succès !");
+                                            updateAllBalances();
+                                        } else {
+                                            showToast(data.message, "error");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Erreur:', error);
+                                        showToast('Erreur de connexion au serveur', 'error');
+                                    });
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.log("Le QR code ne contient pas une transaction valide");
+                    }
+                    
+                    html5QrCode.stop();
+                },
+                (errorMessage) => {
+                }
+            ).catch(err => {
+                scannerContainer.innerHTML = `<p>Impossible d'accéder à la caméra. Veuillez vérifier les permissions.</p>`;
+            });
+        }
+        
+        function showPage(pageId) {
+            if ((pageId !== 'login-page' && pageId !== 'register-page') && !userPhone) {
+                showToast("Veuillez vous connecter d'abord", "error");
+                pageId = 'login-page';
+            }
+            
+            currentPage = pageId;
+            
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.onclick && item.onclick.toString().includes(pageId)) {
+                    item.classList.add('active');
+                }
+            });
+            
+            if (pageId === 'dashboard-page') updateDashboard();
+            if (pageId === 'transactions-page') showTransactions();
+            if (pageId === 'stats-page') showStats();
+            if (pageId === 'scanner-page') initScanner();
+            if (pageId === 'admin-page') loadAdminRequests();
+            
+            updateAllBalances();
+        }
+        
+        function startApp() {
+            document.getElementById('presentation-screen').style.display = 'none';
+            document.querySelector('.app-container').style.display = 'block';
+            
+            // Vérifier si l'utilisateur est déjà connecté
+            if (userPhone) {
+                showPage('dashboard-page');
+                updateUserDisplay();
+                updateAllBalances();
+            } else {
+                showPage('login-page');
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const incomeDate = document.getElementById('income-date');
+            const expenseDate = document.getElementById('expense-date');
+            
+            if (incomeDate) incomeDate.value = today;
+            if (expenseDate) expenseDate.value = today;
+            
+            // Vérifier si l'utilisateur est déjà connecté
+            if (userPhone) {
+                document.getElementById('presentation-screen').style.display = 'none';
+                document.querySelector('.app-container').style.display = 'block';
+                showPage('dashboard-page');
+                updateUserDisplay();
+                updateAllBalances();
+            } else {
+                document.getElementById('presentation-screen').style.display = 'flex';
+            }
+            
+            // Afficher le champ mot de passe admin si numéro admin
+            const loginPhone = document.getElementById('login-phone');
+            const adminPasswordGroup = document.getElementById('admin-password-group');
+            
+            if (loginPhone) {
+                loginPhone.addEventListener('input', function() {
+                    adminPasswordGroup.style.display = this.value === ADMIN_PHONE ? 'block' : 'none';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
